@@ -1,8 +1,9 @@
 @extends('layouts.app')
 @section('title', 'MangaHub - Inicio')
 @section('content')
-    <h1 class="hero-title">JAPANESE ANIMATION</h1>
-    <p class="muted">Catálogo de mangas y noticias con estilo rojo/negro.</p>
+    <p class="muted">En <b>MangaHub</b> te conectamos con todo lo que amás del mundo otaku.<br>
+                    Encontrá una amplia selección de mangas para comprar, desde clásicos hasta los estrenos más esperados, y enterate de las últimas novedades del anime.<br>
+                    ¡Tu próxima historia épica comienza acá!</p>
 
     <div class="section">
         <h2>Libros</h2>

@@ -6,7 +6,7 @@
     <title>@yield('title', 'MangaHub')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d0d0d;            /* negro profundo */
@@ -16,7 +16,7 @@
             --primary: #d32f2f;      /* rojo intenso */
             --accent: #ff5858;       /* rojo brillante */
             --border: #222;          /* bordes */
-            --display: 'Bebas Neue', Oswald, system-ui, Arial, sans-serif; /* fuente de títulos */
+            --display: "Playpen Sans", cursive; /* fuente de títulos */
         }
         * { box-sizing: border-box; }
         body { margin: 0; font-family: system-ui, Arial, sans-serif; background: var(--bg); color: var(--text); position: relative; }
@@ -39,21 +39,50 @@
         .topbar { display:flex; align-items:center; justify-content:space-between; padding: 14px 20px; background: #000; border-bottom: 2px solid var(--primary); position: sticky; top:0; z-index: 10; }
         .brand { font-weight: 800; letter-spacing: 1px; font-family: var(--display); font-size: 22px; }
         .nav a { margin-right: 14px; }
-        .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
-        .section { margin-top: 24px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+        .section { margin: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
         .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
-        .muted { color: var(--muted); }
+        .muted { color: var(--muted); font-size: 1.2rem; text-align: center;}
         img { max-width: 100%; height: auto; border-radius: 6px; }
         .table { width: 100%; border-collapse: collapse; background: var(--panel); }
         .table th, .table td { border: 1px solid var(--border); padding: 10px; }
         .table th { background: #111; color: var(--text); }
         .actions a, .actions form { display:inline-block; margin-right:8px; }
-        .btn { display:inline-block; padding:8px 12px; border-radius:6px; border:1px solid var(--primary); color: var(--text); background: transparent; cursor:pointer; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn:hover { background: var(--primary); }
+        .btn { display:inline-block; padding:8px 12px; border-radius:6px; border:1px solid var(--primary); color: var(--text); background: transparent; cursor:pointer; letter-spacing: 0.5px; }
+        .btn:hover { background: var(--primary); color: white; }
         .status { color: #7ce37c; }
         h1, h2, h3, .hero-title { font-family: var(--display); }
         .hero-title { font-size: 56px; font-weight: 900; letter-spacing: 2px; }
+
+        .banner {
+            position: relative;
+            margin: auto;
+            max-width: 1100px;
+        }
+
+        .banner img{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner h1{
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            font-size: 200px;
+            text-align: center;
+            font-weight: 400;
+            mix-blend-mode: multiply;
+            object-fit: cover;
+            border-radius: 5px;
+            text-shadow: 3px 3px #000000;
+            border: 1px red solid;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
@@ -77,6 +106,11 @@
                 <a class="btn" href="{{ route('login.show') }}">Iniciar sesión</a>
             @endauth
         </div>
+    </div>
+
+    <div class="banner">
+        <img src="{{ asset('assets/banner.gif') }}" alt="Banner">
+        <h1>MangaHub</h1>
     </div>
 
     <div class="container">
