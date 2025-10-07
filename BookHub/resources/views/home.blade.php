@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookHub - Inicio</title>
+    <title>MangaHub - Inicio</title>
     <style>
         body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
         h1 { margin-bottom: 8px; }
@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>BookHub</h1>
+    <h1>MangaHub</h1>
     <p class="muted">Catálogo de Libros y Noticias</p>
 
     <div class="section">

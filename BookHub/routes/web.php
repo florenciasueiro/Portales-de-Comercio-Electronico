@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Libro;
 use App\Models\Noticia;
+use App\Http\Controllers\LibroController;
+use App\Http\Controllers\NoticiaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +22,6 @@ Route::get('/', function () {
     $noticias = Noticia::latest()->get();
     return view('home', compact('libros', 'noticias'));
 });
+
+Route::resource('libros', LibroController::class);
+Route::resource('noticias', NoticiaController::class);

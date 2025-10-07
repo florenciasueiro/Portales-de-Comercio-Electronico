@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Libro;
+use App\Models\Noticia;
 use Illuminate\Http\Request;
 
-class LibroController extends Controller
+class NoticiaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class LibroController extends Controller
      */
     public function index()
     {
-        $libros = Libro::latest()->paginate(10);
-        return view('libros.index', compact('libros'));
+        $noticias = Noticia::latest()->paginate(10);
+        return view('noticias.index', compact('noticias'));
     }
 
     /**
@@ -25,7 +25,7 @@ class LibroController extends Controller
      */
     public function create()
     {
-        return view('libros.create');
+        return view('noticias.create');
     }
 
     /**
@@ -38,70 +38,66 @@ class LibroController extends Controller
     {
         $data = $request->validate([
             'titulo' => 'required|string|max:255',
-            'autor' => 'required|string|max:255',
-            'precio' => 'required|numeric|min:0',
-            'descripcion' => 'nullable|string',
+            'contenido' => 'required|string',
             'imagen' => 'nullable|string',
-            'categoria' => 'nullable|string|max:255',
+            'fecha' => 'required|date',
         ]);
 
-        $libro = Libro::create($data);
-        return redirect()->route('libros.index')->with('status', 'Libro creado');
+        $noticia = Noticia::create($data);
+        return redirect()->route('noticias.index')->with('status', 'Noticia creada');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Libro  $libro
+     * @param  \App\Models\Noticia  $noticia
      * @return \Illuminate\Http\Response
      */
-    public function show(Libro $libro)
+    public function show(Noticia $noticia)
     {
-        return view('libros.show', compact('libro'));
+        return view('noticias.show', compact('noticia'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Libro  $libro
+     * @param  \App\Models\Noticia  $noticia
      * @return \Illuminate\Http\Response
      */
-    public function edit(Libro $libro)
+    public function edit(Noticia $noticia)
     {
-        return view('libros.edit', compact('libro'));
+        return view('noticias.edit', compact('noticia'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Libro  $libro
+     * @param  \App\Models\Noticia  $noticia
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Libro $libro)
+    public function update(Request $request, Noticia $noticia)
     {
         $data = $request->validate([
             'titulo' => 'required|string|max:255',
-            'autor' => 'required|string|max:255',
-            'precio' => 'required|numeric|min:0',
-            'descripcion' => 'nullable|string',
+            'contenido' => 'required|string',
             'imagen' => 'nullable|string',
-            'categoria' => 'nullable|string|max:255',
+            'fecha' => 'required|date',
         ]);
 
-        $libro->update($data);
-        return redirect()->route('libros.index')->with('status', 'Libro actualizado');
+        $noticia->update($data);
+        return redirect()->route('noticias.index')->with('status', 'Noticia actualizada');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Libro  $libro
+     * @param  \App\Models\Noticia  $noticia
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Libro $libro)
+    public function destroy(Noticia $noticia)
     {
-        $libro->delete();
-        return redirect()->route('libros.index')->with('status', 'Libro eliminado');
+        $noticia->delete();
+        return redirect()->route('noticias.index')->with('status', 'Noticia eliminada');
     }
 }
