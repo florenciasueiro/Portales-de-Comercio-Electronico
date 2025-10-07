@@ -1,54 +1,81 @@
 @extends('layouts.app')
 @section('title', 'Libros - MangaHub')
 @section('content')
-    <div class="section" style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Libros</h1>
-        <div>
-            @auth
-                @if(auth()->user()->is_admin)
-                    <a class="btn" href="{{ route('libros.create') }}">Nuevo Libro</a>
-                @endif
-            @endauth
-        </div>
+<section class="min-h-screen bg-gradient-to-b from-neutral-900 to-black text-gray-100 py-12 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-red-400 drop-shadow-md">Libros</h1>
+      @auth
+        @if(auth()->user()->is_admin)
+          <div class="flex items-center gap-3">
+            <a class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition" href="{{ route('libros.create') }}">Nuevo Libro</a>
+            <div class="inline-flex gap-2">
+              <span class="text-sm text-neutral-300 self-center">Vista:</span>
+              <button id="viewCards" class="px-3 py-1 rounded-lg border border-neutral-600 text-neutral-200 hover:bg-neutral-800 transition">Tarjetas</button>
+              <button id="viewList" class="px-3 py-1 rounded-lg border border-neutral-600 text-neutral-200 hover:bg-neutral-800 transition">Lista</button>
+            </div>
+          </div>
+        @endif
+      @endauth
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Precio</th>
-                <th>Categoría</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach($libros as $libro)
-            <tr>
-                <td>{{ $libro->id }}</td>
-                <td><a href="{{ route('libros.show', $libro) }}">{{ $libro->titulo }}</a></td>
-                <td>{{ $libro->autor }}</td>
-                <td>${{ number_format($libro->precio,2,',','.') }}</td>
-                <td>{{ $libro->categoria }}</td>
-                <td class="actions">
-                    @auth
-                        @if(auth()->user()->is_admin)
-                            <a class="btn" href="{{ route('libros.edit', $libro) }}">Editar</a>
-                            <form action="{{ route('libros.destroy', $libro) }}" method="POST" onsubmit="return confirm('¿Eliminar libro?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn" type="submit">Eliminar</button>
-                            </form>
-                        @endif
-                    @endauth
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+    <div class="mb-6 flex flex-wrap gap-3 items-center">
+      <button data-cat="" class="filter-chip px-3 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/20 transition {{ empty($categoria) ? 'bg-red-500/20' : '' }}">Todas</button>
+      @foreach($categorias as $cat)
+        <button data-cat="{{ $cat }}" class="filter-chip px-3 py-1 rounded-full border border-neutral-600 text-neutral-300 hover:bg-neutral-800 transition {{ ($categoria===$cat) ? 'bg-neutral-800' : '' }}">{{ $cat }}</button>
+      @endforeach
 
-    <div style="margin-top:12px;">
-        {{ $libros->links() }}
+      <div class="ml-auto flex items-center gap-2">
+        <input id="searchInput" type="text" value="{{ $search }}" placeholder="Buscar por título/autor..."
+               class="w-56 p-2 bg-neutral-900 border border-neutral-700 rounded-lg focus:border-red-500 focus:ring-1 focus:ring-red-500 transition">
+        <button id="searchBtn" class="px-4 py-2 bg-transparent border border-red-500 text-red-400 rounded-lg hover:bg-red-500/20 transition">Buscar</button>
+      </div>
     </div>
+
+    <div id="books-content">
+      @include(($view==='simple') ? 'libros._list_simple' : 'libros._list', ['libros' => $libros])
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const container = document.getElementById('books-content');
+      const chips = document.querySelectorAll('.filter-chip');
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const viewCards = document.getElementById('viewCards');
+      const viewList = document.getElementById('viewList');
+      let currentCat = "{{ $categoria }}";
+      let currentView = "{{ ($view==='simple') ? 'simple' : '' }}";
+
+      async function updateContent(cat, search){
+        const params = new URLSearchParams();
+        if (cat) params.set('categoria', cat);
+        if (search) params.set('search', search);
+        params.set('ajax','1');
+        const url = `{{ route('libros.index') }}?${params.toString()}`;
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const html = await res.text();
+        container.innerHTML = html;
+      }
+
+      chips.forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCat = btn.dataset.cat || '';
+          chips.forEach(b => b.classList.remove('bg-red-500/20', 'bg-neutral-800'));
+          if (!currentCat) btn.classList.add('bg-red-500/20'); else btn.classList.add('bg-neutral-800');
+          updateContent(currentCat, searchInput.value.trim());
+        });
+      });
+
+      searchBtn.addEventListener('click', () => updateContent(currentCat, searchInput.value.trim()));
+      searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateContent(currentCat, searchInput.value.trim()); });
+
+      if (viewCards && viewList) {
+        viewCards.addEventListener('click', () => { currentView = ''; updateContent(currentCat, searchInput.value.trim()); });
+        viewList.addEventListener('click', () => { currentView = 'simple'; updateContent(currentCat, searchInput.value.trim()); });
+      }
+    })();
+  </script>
+</section>
 @endsection

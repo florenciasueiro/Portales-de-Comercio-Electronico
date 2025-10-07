@@ -37,4 +37,8 @@ Route::resource('noticias', NoticiaController::class)->only(['index', 'show']);
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('libros', LibroController::class)->except(['index', 'show']);
     Route::resource('noticias', NoticiaController::class)->except(['index', 'show']);
+
+    // Utilidades de administración: búsqueda automática de imágenes
+    Route::get('/libros/image-search', [LibroController::class, 'imageSearch'])->name('libros.imageSearch');
+    Route::get('/noticias/og-image', [NoticiaController::class, 'ogImage'])->name('noticias.ogImage');
 });
