@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Libro;
+use App\Models\Noticia;
 
-class LibroSeeder extends Seeder
+class NoticiaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,6 +15,6 @@ class LibroSeeder extends Seeder
      */
     public function run()
     {
-        Libro::factory()->count(12)->create();
+        Noticia::factory()->count(6)->create();
     }
 }
