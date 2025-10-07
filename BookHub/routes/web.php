@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Libro;
+use App\Models\Noticia;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $libros = Libro::latest()->get();
+    $noticias = Noticia::latest()->get();
+    return view('home', compact('libros', 'noticias'));
 });
