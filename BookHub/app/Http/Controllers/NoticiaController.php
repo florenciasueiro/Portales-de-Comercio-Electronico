@@ -79,6 +79,38 @@ class NoticiaController extends Controller
         if ($request->hasFile('imagen_file')) {
             $path = $request->file('imagen_file')->store('news', 'public');
             $data['imagen'] = Storage::url($path);
+        } else {
+            // Si viene una URL externa o data URL en 'imagen', descargar y guardar localmente
+            $src = trim((string)($data['imagen'] ?? ''));
+            if ($src !== '' && (preg_match('/^https?:\/\//i', $src) || str_starts_with($src, 'data:image/'))) {
+                try {
+                    $filename = 'news_' . uniqid();
+                    $ext = 'jpg';
+                    $contents = null;
+                    if (str_starts_with($src, 'data:image/')) {
+                        if (preg_match('/^data:image\/(png|jpeg|jpg|webp);base64,/', $src, $m)) {
+                            $ext = $m[1] === 'jpeg' ? 'jpg' : $m[1];
+                        }
+                        $base64 = substr($src, strpos($src, ',') + 1);
+                        $contents = base64_decode($base64);
+                    } else {
+                        $client = new Client(['timeout' => 8.0]);
+                        $resp = $client->get($src);
+                        $ct = strtolower($resp->getHeaderLine('Content-Type'));
+                        if (str_contains($ct, 'png')) $ext = 'png';
+                        elseif (str_contains($ct, 'webp')) $ext = 'webp';
+                        elseif (str_contains($ct, 'jpeg') || str_contains($ct, 'jpg')) $ext = 'jpg';
+                        $contents = $resp->getBody()->getContents();
+                    }
+                    if ($contents) {
+                        $path = 'news/' . $filename . '.' . $ext;
+                        Storage::disk('public')->put($path, $contents);
+                        $data['imagen'] = Storage::url($path);
+                    }
+                } catch (\Throwable $e) {
+                    // Si falla la descarga, dejamos el valor como está
+                }
+            }
         }
         unset($data['imagen_file']);
 
@@ -129,6 +161,38 @@ class NoticiaController extends Controller
         if ($request->hasFile('imagen_file')) {
             $path = $request->file('imagen_file')->store('news', 'public');
             $data['imagen'] = Storage::url($path);
+        } else {
+            // Si viene una URL externa o data URL en 'imagen', descargar y guardar localmente
+            $src = trim((string)($data['imagen'] ?? ''));
+            if ($src !== '' && (preg_match('/^https?:\/\//i', $src) || str_starts_with($src, 'data:image/'))) {
+                try {
+                    $filename = 'news_' . uniqid();
+                    $ext = 'jpg';
+                    $contents = null;
+                    if (str_starts_with($src, 'data:image/')) {
+                        if (preg_match('/^data:image\/(png|jpeg|jpg|webp);base64,/', $src, $m)) {
+                            $ext = $m[1] === 'jpeg' ? 'jpg' : $m[1];
+                        }
+                        $base64 = substr($src, strpos($src, ',') + 1);
+                        $contents = base64_decode($base64);
+                    } else {
+                        $client = new Client(['timeout' => 8.0]);
+                        $resp = $client->get($src);
+                        $ct = strtolower($resp->getHeaderLine('Content-Type'));
+                        if (str_contains($ct, 'png')) $ext = 'png';
+                        elseif (str_contains($ct, 'webp')) $ext = 'webp';
+                        elseif (str_contains($ct, 'jpeg') || str_contains($ct, 'jpg')) $ext = 'jpg';
+                        $contents = $resp->getBody()->getContents();
+                    }
+                    if ($contents) {
+                        $path = 'news/' . $filename . '.' . $ext;
+                        Storage::disk('public')->put($path, $contents);
+                        $data['imagen'] = Storage::url($path);
+                    }
+                } catch (\Throwable $e) {
+                    // Si falla la descarga, dejamos el valor como está
+                }
+            }
         }
         unset($data['imagen_file']);
 
