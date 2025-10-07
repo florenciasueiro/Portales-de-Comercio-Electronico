@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Libro;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LibroController extends Controller
 {
@@ -42,8 +43,15 @@ class LibroController extends Controller
             'precio' => 'required|numeric|min:0',
             'descripcion' => 'nullable|string',
             'imagen' => 'nullable|string',
+            'imagen_file' => 'nullable|image|max:2048',
             'categoria' => 'nullable|string|max:255',
         ]);
+
+        if ($request->hasFile('imagen_file')) {
+            $path = $request->file('imagen_file')->store('covers', 'public');
+            $data['imagen'] = Storage::url($path); // /storage/covers/...
+        }
+        unset($data['imagen_file']);
 
         $libro = Libro::create($data);
         return redirect()->route('libros.index')->with('status', 'Libro creado');
@@ -86,8 +94,15 @@ class LibroController extends Controller
             'precio' => 'required|numeric|min:0',
             'descripcion' => 'nullable|string',
             'imagen' => 'nullable|string',
+            'imagen_file' => 'nullable|image|max:2048',
             'categoria' => 'nullable|string|max:255',
         ]);
+
+        if ($request->hasFile('imagen_file')) {
+            $path = $request->file('imagen_file')->store('covers', 'public');
+            $data['imagen'] = Storage::url($path);
+        }
+        unset($data['imagen_file']);
 
         $libro->update($data);
         return redirect()->route('libros.index')->with('status', 'Libro actualizado');
