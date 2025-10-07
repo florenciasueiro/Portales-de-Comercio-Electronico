@@ -194,4 +194,50 @@ class LibroController extends Controller
 
         return response()->json(['data' => $results]);
     }
+
+    /**
+     * Obtener datos de manga por MAL ID usando Jikan.
+     * Admin-only. Devuelve título, sinopsis e imagen.
+     */
+    public function imageById(Request $request)
+    {
+        $this->middleware(['auth', 'admin']);
+
+        $id = trim((string)$request->query('mal_id', ''));
+        if ($id === '' || !ctype_digit($id)) {
+            return response()->json(['error' => 'mal_id inválido'], 422);
+        }
+
+        $client = new Client(['timeout' => 5.0]);
+        try {
+            $resp = $client->get("https://api.jikan.moe/v4/manga/{$id}");
+            $json = json_decode($resp->getBody()->getContents(), true);
+            $data = $json['data'] ?? null;
+            if (!$data) {
+                return response()->json(['error' => 'No encontrado'], 404);
+            }
+            $img = $data['images']['jpg']['large_image_url']
+                ?? ($data['images']['jpg']['image_url'] ?? null);
+            // Primer género disponible como categoría; fallback a themes/demographics
+            $category = null;
+            if (!empty($data['genres']) && isset($data['genres'][0]['name'])) {
+                $category = $data['genres'][0]['name'];
+            } elseif (!empty($data['themes']) && isset($data['themes'][0]['name'])) {
+                $category = $data['themes'][0]['name'];
+            } elseif (!empty($data['demographics']) && isset($data['demographics'][0]['name'])) {
+                $category = $data['demographics'][0]['name'];
+            }
+            return response()->json([
+                'data' => [
+                    'mal_id' => (int)$id,
+                    'title' => $data['title'] ?? null,
+                    'synopsis' => $data['synopsis'] ?? null,
+                    'image' => $img,
+                    'category' => $category,
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Error de red o API'], 502);
+        }
+    }
 }

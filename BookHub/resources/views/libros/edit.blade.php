@@ -54,7 +54,8 @@
 
       @if($libro->imagen)
       <div class="flex justify-center">
-        <img src="{{ $libro->imagen }}" alt="Portada del libro" class="w-40 rounded-lg border border-neutral-700 shadow-md">
+        @php $src = preg_match('/^(https?:|data:)/', $libro->imagen) ? $libro->imagen : asset(ltrim($libro->imagen,'/')); @endphp
+        <img src="{{ $src }}" alt="Portada del libro" class="w-40 rounded-lg border border-neutral-700 shadow-md">
       </div>
       @endif
 
@@ -67,6 +68,15 @@
         </div>
         <p class="text-xs text-gray-400 mt-1">Usa Jikan (título del libro/manga) para sugerir portadas.</p>
         <div id="resultados-imagen" class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">Completar por MAL ID</label>
+        <div class="flex gap-2">
+          <input id="mal-id" type="text" placeholder="Ej: 11 (Naruto)"
+                 class="w-40 p-3 bg-neutral-900 border border-neutral-700 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition">
+          <button type="button" id="cargar-mal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition">Cargar por MAL ID</button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Trae título, sinopsis e imagen desde Jikan (MyAnimeList).</p>
       </div>
 
       <div>
@@ -91,6 +101,10 @@
     const inputTitulo = document.querySelector('input[name="titulo"]');
     const inputImagen = document.getElementById('imagen-url');
     const contenedor = document.getElementById('resultados-imagen');
+    const malIdInput = document.getElementById('mal-id');
+    const malBtn = document.getElementById('cargar-mal');
+    const inputDescripcion = document.querySelector('textarea[name="descripcion"]');
+    const inputCategoria = document.querySelector('input[name="categoria"]');
     if(!btn) return;
     btn.addEventListener('click', async () => {
       const q = (inputTitulo?.value || '').trim();
@@ -116,6 +130,24 @@
         btn.disabled = false; btn.textContent = 'Buscar imagen automáticamente';
       }
     });
+    if (malBtn) {
+      malBtn.addEventListener('click', async () => {
+        const id = (malIdInput?.value || '').trim();
+        if (!id || !/^\d+$/.test(id)) { alert('Ingresá un MAL ID numérico.'); return; }
+        malBtn.disabled = true; const prev = malBtn.textContent; malBtn.textContent = 'Cargando...';
+        try{
+          const res = await fetch("{{ route('libros.imageById') }}" + `?mal_id=${encodeURIComponent(id)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          const data = await res.json();
+          const d = data.data || {};
+          if (!d || (!d.image && !d.title)) { alert('No se encontraron datos para ese ID.'); }
+          if (d.image) inputImagen.value = d.image;
+          if (d.title && (!inputTitulo.value || inputTitulo.value.trim()==='')) inputTitulo.value = d.title;
+          if (d.synopsis && (!inputDescripcion.value || inputDescripcion.value.trim()==='')) inputDescripcion.value = d.synopsis;
+          if (d.category && (!inputCategoria.value || inputCategoria.value.trim()==='')) inputCategoria.value = d.category;
+        }catch(e){ alert('Error obteniendo datos de Jikan.'); }
+        finally{ malBtn.disabled = false; malBtn.textContent = prev; }
+      });
+    }
   })();
 </script>
 @endsection

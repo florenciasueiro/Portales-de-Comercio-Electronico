@@ -40,5 +40,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Utilidades de administración: búsqueda automática de imágenes
     Route::get('/libros/image-search', [LibroController::class, 'imageSearch'])->name('libros.imageSearch');
+    Route::get('/libros/image-by-id', [LibroController::class, 'imageById'])->name('libros.imageById');
     Route::get('/noticias/og-image', [NoticiaController::class, 'ogImage'])->name('noticias.ogImage');
 });
