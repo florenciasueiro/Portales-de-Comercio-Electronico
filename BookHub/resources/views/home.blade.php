@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MangaHub - Inicio</title>
-    <style>
-        body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
-        h1 { margin-bottom: 8px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-        .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
-        .section { margin-top: 24px; }
-        .muted { color: #666; }
-        img { max-width: 100%; height: auto; border-radius: 4px; }
-    </style>
-</head>
-<body>
-    <h1>MangaHub</h1>
-    <p class="muted">Catálogo de Libros y Noticias</p>
+@extends('layouts.app')
+@section('title', 'MangaHub - Inicio')
+@section('content')
+    <h1 class="hero-title">JAPANESE ANIMATION</h1>
+    <p class="muted">Catálogo de mangas y noticias con estilo rojo/negro.</p>
 
     <div class="section">
         <h2>Libros</h2>
@@ -38,6 +24,7 @@
                         @if($libro->descripcion)
                             <p>{{ $libro->descripcion }}</p>
                         @endif
+                        <p><a class="btn" href="{{ route('libros.show', $libro) }}">Ver detalle</a></p>
                     </div>
                 @endforeach
             </div>
@@ -58,10 +45,10 @@
                         @endif
                         <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($noticia->fecha)->format('d/m/Y') }}</p>
                         <p>{{ $noticia->contenido }}</p>
+                        <p><a class="btn" href="{{ route('noticias.show', $noticia) }}">Ver detalle</a></p>
                     </div>
                 @endforeach
             </div>
         @endif
     </div>
-</body>
-</html>
+@endsection

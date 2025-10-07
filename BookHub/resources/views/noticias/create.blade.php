@@ -8,6 +8,11 @@
 <body>
     <h1>Nueva Noticia</h1>
     <a href="{{ route('noticias.index') }}">Volver al listado</a>
+    @auth
+        @if(!auth()->user()->is_admin)
+            <p>Acceso restringido a administradores.</p>
+        @endif
+    @endauth
 
     <form action="{{ route('noticias.store') }}" method="POST">
         @csrf

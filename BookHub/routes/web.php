@@ -5,6 +5,7 @@ use App\Models\Libro;
 use App\Models\Noticia;
 use App\Http\Controllers\LibroController;
 use App\Http\Controllers\NoticiaController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,5 +24,17 @@ Route::get('/', function () {
     return view('home', compact('libros', 'noticias'));
 });
 
-Route::resource('libros', LibroController::class);
-Route::resource('noticias', NoticiaController::class);
+// Rutas de login/logout
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login.show');
+Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout.perform');
+
+// Invitados: pueden ver listados y detalles
+Route::resource('libros', LibroController::class)->only(['index', 'show']);
+Route::resource('noticias', NoticiaController::class)->only(['index', 'show']);
+
+// Admin: crear/editar/eliminar
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('libros', LibroController::class)->except(['index', 'show']);
+    Route::resource('noticias', NoticiaController::class)->except(['index', 'show']);
+});

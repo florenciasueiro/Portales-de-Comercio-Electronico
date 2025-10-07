@@ -18,7 +18,11 @@
         <h1>Noticias</h1>
         <div>
             <a href="/" style="margin-right:10px;">Inicio</a>
-            <a href="{{ route('noticias.create') }}">Nueva Noticia</a>
+            @auth
+                @if(auth()->user()->is_admin)
+                    <a href="{{ route('noticias.create') }}">Nueva Noticia</a>
+                @endif
+            @endauth
         </div>
     </div>
 
@@ -42,12 +46,16 @@
                 <td><a href="{{ route('noticias.show', $noticia) }}">{{ $noticia->titulo }}</a></td>
                 <td>{{ \Carbon\Carbon::parse($noticia->fecha)->format('d/m/Y') }}</td>
                 <td class="actions">
-                    <a href="{{ route('noticias.edit', $noticia) }}">Editar</a>
-                    <form action="{{ route('noticias.destroy', $noticia) }}" method="POST" onsubmit="return confirm('¿Eliminar noticia?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit">Eliminar</button>
-                    </form>
+                    @auth
+                        @if(auth()->user()->is_admin)
+                            <a href="{{ route('noticias.edit', $noticia) }}">Editar</a>
+                            <form action="{{ route('noticias.destroy', $noticia) }}" method="POST" onsubmit="return confirm('¿Eliminar noticia?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        @endif
+                    @endauth
                 </td>
             </tr>
         @endforeach
