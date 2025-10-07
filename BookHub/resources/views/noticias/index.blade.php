@@ -8,7 +8,11 @@
       @auth
         @if(auth()->user()->is_admin)
           <div class="flex items-center gap-3">
-            <a class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition" href="{{ route('noticias.create') }}">Nueva Noticia</a>
+            @auth
+              @if(auth()->user()->is_admin)
+                <a class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition" href="{{ route('noticias.create') }}">Nueva Noticia</a>
+              @endif
+            @endauth
             <div class="inline-flex gap-2">
               <span class="text-sm text-neutral-300 self-center">Vista:</span>
               <button id="viewCards" class="px-3 py-1 rounded-lg border border-neutral-600 text-neutral-200 hover:bg-neutral-800 transition">Tarjetas</button>
