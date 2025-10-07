@@ -14,7 +14,7 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!Auth::check() || !Auth::user()->is_admin) {
-            return redirect('/')->with('status', 'Acceso restringido a administradores');
+            abort(403);
         }
         return $next($request);
     }
