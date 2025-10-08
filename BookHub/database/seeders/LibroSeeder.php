@@ -5,7 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Libro;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class LibroSeeder extends Seeder
 {
@@ -16,34 +17,78 @@ class LibroSeeder extends Seeder
      */
     public function run()
     {
-        $mangas = [
-            ['titulo' => 'One Piece', 'autor' => 'Eiichiro Oda', 'categoria' => 'Shonen', 'precio' => 12.99, 'descripcion' => 'Aventuras piratas en busca del One Piece.', 'imagen' => 'https://via.placeholder.com/400x300?text=One+Piece'],
-            ['titulo' => 'Naruto', 'autor' => 'Masashi Kishimoto', 'categoria' => 'Shonen', 'precio' => 11.99, 'descripcion' => 'La historia del ninja Naruto Uzumaki.', 'imagen' => 'https://via.placeholder.com/400x300?text=Naruto'],
-            ['titulo' => 'Bleach', 'autor' => 'Tite Kubo', 'categoria' => 'Shonen', 'precio' => 10.99, 'descripcion' => 'Shinigamis, hollows y batallas épicas.', 'imagen' => 'https://via.placeholder.com/400x300?text=Bleach'],
-            ['titulo' => 'Attack on Titan', 'autor' => 'Hajime Isayama', 'categoria' => 'Seinen', 'precio' => 13.99, 'descripcion' => 'Humanidad vs titanes tras las murallas.', 'imagen' => 'https://via.placeholder.com/400x300?text=Attack+on+Titan'],
-            ['titulo' => 'Fullmetal Alchemist', 'autor' => 'Hiromu Arakawa', 'categoria' => 'Shonen', 'precio' => 12.50, 'descripcion' => 'Los hermanos Elric y la alquimia.', 'imagen' => 'https://via.placeholder.com/400x300?text=Fullmetal+Alchemist'],
-            ['titulo' => 'Death Note', 'autor' => 'Tsugumi Ohba / Takeshi Obata', 'categoria' => 'Seinen', 'precio' => 12.00, 'descripcion' => 'Un cuaderno que puede matar y un duelo intelectual.', 'imagen' => 'https://via.placeholder.com/400x300?text=Death+Note'],
-            ['titulo' => 'Demon Slayer', 'autor' => 'Koyoharu Gotouge', 'categoria' => 'Shonen', 'precio' => 11.50, 'descripcion' => 'Cazadores de demonios en la era Taisho.', 'imagen' => 'https://via.placeholder.com/400x300?text=Demon+Slayer'],
-            ['titulo' => 'Jujutsu Kaisen', 'autor' => 'Gege Akutami', 'categoria' => 'Shonen', 'precio' => 12.20, 'descripcion' => 'Hechicería y maldiciones modernas.', 'imagen' => 'https://via.placeholder.com/400x300?text=Jujutsu+Kaisen'],
-            ['titulo' => 'Chainsaw Man', 'autor' => 'Tatsuki Fujimoto', 'categoria' => 'Seinen', 'precio' => 12.90, 'descripcion' => 'Denji y la brutalidad de los demonios.', 'imagen' => 'https://via.placeholder.com/400x300?text=Chainsaw+Man'],
-            ['titulo' => 'My Hero Academia', 'autor' => 'Kohei Horikoshi', 'categoria' => 'Shonen', 'precio' => 11.75, 'descripcion' => 'Héroes y estudiantes con “quirks”.', 'imagen' => 'https://via.placeholder.com/400x300?text=My+Hero+Academia'],
-            ['titulo' => 'Spy x Family', 'autor' => 'Tatsuya Endo', 'categoria' => 'Shonen', 'precio' => 10.90, 'descripcion' => 'Una familia peculiar: espía, asesina y telépata.', 'imagen' => 'https://via.placeholder.com/400x300?text=Spy+x+Family'],
-            ['titulo' => 'Tokyo Ghoul', 'autor' => 'Sui Ishida', 'categoria' => 'Seinen', 'precio' => 12.40, 'descripcion' => 'Ghouls y dilemas entre humanos y monstruos.', 'imagen' => 'https://via.placeholder.com/400x300?text=Tokyo+Ghoul'],
-            ['titulo' => 'Slam Dunk', 'autor' => 'Takehiko Inoue', 'categoria' => 'Deportes', 'precio' => 9.99, 'descripcion' => 'Baloncesto escolar con mucha pasión.', 'imagen' => 'https://via.placeholder.com/400x300?text=Slam+Dunk'],
-            ['titulo' => 'Monster', 'autor' => 'Naoki Urasawa', 'categoria' => 'Seinen', 'precio' => 13.50, 'descripcion' => 'Thriller psicológico de altísimo nivel.', 'imagen' => 'https://via.placeholder.com/400x300?text=Monster'],
-            ['titulo' => 'Vagabond', 'autor' => 'Takehiko Inoue', 'categoria' => 'Seinen', 'precio' => 14.50, 'descripcion' => 'Miyamoto Musashi en un arte visual magnífico.', 'imagen' => 'https://via.placeholder.com/400x300?text=Vagabond'],
-        ];
+        // Limpiar libros existentes para evitar mezclas con placeholders
+        DB::table('libros')->truncate();
 
-        foreach ($mangas as $manga) {
+        $libros = [];
+        try {
+            // Top Manga y fallback Top Anime
+            $topManga = Http::timeout(8)->get('https://api.jikan.moe/v4/top/manga', [
+                'limit' => 20,
+            ])->json()['data'] ?? [];
+
+            $topAnime = Http::timeout(8)->get('https://api.jikan.moe/v4/top/anime', [
+                'limit' => 20,
+            ])->json()['data'] ?? [];
+
+            // Mapear manga a libros
+            foreach ($topManga as $m) {
+                $img = $m['images']['jpg']['large_image_url'] ?? ($m['images']['jpg']['image_url'] ?? null);
+                $author = null;
+                if (!empty($m['authors']) && isset($m['authors'][0]['name'])) {
+                    $author = $m['authors'][0]['name'];
+                }
+                $category = null;
+                if (!empty($m['genres']) && isset($m['genres'][0]['name'])) {
+                    $category = $m['genres'][0]['name'];
+                } elseif (!empty($m['themes']) && isset($m['themes'][0]['name'])) {
+                    $category = $m['themes'][0]['name'];
+                } elseif (!empty($m['demographics']) && isset($m['demographics'][0]['name'])) {
+                    $category = $m['demographics'][0]['name'];
+                }
+                $libros[] = [
+                    'titulo' => $m['title'] ?? 'Título desconocido',
+                    'autor' => $author ?? 'Autor desconocido',
+                    'precio' => round(mt_rand(990, 1990) / 100, 2),
+                    'descripcion' => $m['synopsis'] ?? null,
+                    'imagen' => $img,
+                    'categoria' => $category,
+                ];
+            }
+
+            // Mapear anime a libros (sin autor real, se usa estudio o placeholder)
+            foreach ($topAnime as $a) {
+                $img = $a['images']['jpg']['large_image_url'] ?? ($a['images']['jpg']['image_url'] ?? null);
+                $studio = null;
+                if (!empty($a['studios']) && isset($a['studios'][0]['name'])) {
+                    $studio = $a['studios'][0]['name'];
+                }
+                $category = null;
+                if (!empty($a['genres']) && isset($a['genres'][0]['name'])) {
+                    $category = $a['genres'][0]['name'];
+                } elseif (!empty($a['themes']) && isset($a['themes'][0]['name'])) {
+                    $category = $a['themes'][0]['name'];
+                } elseif (!empty($a['demographics']) && isset($a['demographics'][0]['name'])) {
+                    $category = $a['demographics'][0]['name'];
+                }
+                $libros[] = [
+                    'titulo' => $a['title'] ?? 'Título desconocido',
+                    'autor' => $studio ?? 'Estudio desconocido',
+                    'precio' => round(mt_rand(990, 1990) / 100, 2),
+                    'descripcion' => $a['synopsis'] ?? null,
+                    'imagen' => $img,
+                    'categoria' => $category,
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Si la API falla, no interrumpir seeding
+        }
+
+        // Persistir
+        foreach ($libros as $item) {
             Libro::updateOrCreate(
-                ['titulo' => $manga['titulo']],
-                [
-                    'autor' => $manga['autor'],
-                    'precio' => $manga['precio'],
-                    'descripcion' => $manga['descripcion'],
-                    'imagen' => $manga['imagen'],
-                    'categoria' => $manga['categoria'],
-                ]
+                ['titulo' => $item['titulo']],
+                $item
             );
         }
     }

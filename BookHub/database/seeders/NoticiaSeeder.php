@@ -6,6 +6,8 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Noticia;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class NoticiaSeeder extends Seeder
 {
@@ -16,60 +18,48 @@ class NoticiaSeeder extends Seeder
      */
     public function run()
     {
-        $noticias = [
-            [
-                'titulo' => 'Nueva temporada de Jujutsu Kaisen anunciada',
-                'contenido' => 'Se confirma la producción de una nueva temporada con adaptación del arco siguiente.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=Jujutsu+Kaisen',
-                'categoria' => 'Anime',
-                'fecha' => Carbon::now()->subDays(5)->format('Y-m-d'),
-            ],
-            [
-                'titulo' => 'Chainsaw Man revela artes del próximo volumen',
-                'contenido' => 'Tatsuki Fujimoto comparte bocetos que muestran el tono del nuevo capítulo.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=Chainsaw+Man',
-                'categoria' => 'Manga',
-                'fecha' => Carbon::now()->subDays(10)->format('Y-m-d'),
-            ],
-            [
-                'titulo' => 'One Piece alcanza un nuevo hito de ventas',
-                'contenido' => 'La serie supera récords históricos en tiradas y lecturas globales.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=One+Piece',
-                'categoria' => 'Industria',
-                'fecha' => Carbon::now()->subDays(15)->format('Y-m-d'),
-            ],
-            [
-                'titulo' => 'Anunciada película de Spy x Family',
-                'contenido' => 'La familia Forger regresa a la gran pantalla con una historia original.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=Spy+x+Family',
-                'categoria' => 'Anime',
-                'fecha' => Carbon::now()->subDays(20)->format('Y-m-d'),
-            ],
-            [
-                'titulo' => 'Demon Slayer muestra trailer del arco siguiente',
-                'contenido' => 'El nuevo avance destaca la animación y el desarrollo de personajes.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=Demon+Slayer',
-                'categoria' => 'Anime',
-                'fecha' => Carbon::now()->subDays(25)->format('Y-m-d'),
-            ],
-            [
-                'titulo' => 'Fullmetal Alchemist recibe nueva edición conmemorativa',
-                'contenido' => 'Incluye arte adicional y comentarios de Hiromu Arakawa.',
-                'imagen' => 'https://via.placeholder.com/800x450?text=Fullmetal+Alchemist',
-                'categoria' => 'Manga',
-                'fecha' => Carbon::now()->subDays(30)->format('Y-m-d'),
-            ],
-        ];
+        // Limpiar noticias existentes para evitar placeholders
+        DB::table('noticias')->truncate();
 
-        foreach ($noticias as $n) {
+        $items = [];
+        try {
+            // Top manga y anime para generar noticias con contenido real (sinopsis/imágenes)
+            $topManga = Http::timeout(8)->get('https://api.jikan.moe/v4/top/manga', [
+                'limit' => 10,
+            ])->json()['data'] ?? [];
+            $topAnime = Http::timeout(8)->get('https://api.jikan.moe/v4/top/anime', [
+                'limit' => 10,
+            ])->json()['data'] ?? [];
+
+            $day = 0;
+            foreach ($topManga as $m) {
+                $img = $m['images']['jpg']['large_image_url'] ?? ($m['images']['jpg']['image_url'] ?? null);
+                $items[] = [
+                    'titulo' => $m['title'] ?? 'Manga destacado',
+                    'contenido' => $m['synopsis'] ?? 'Sin sinopsis',
+                    'imagen' => $img,
+                    'categoria' => 'Manga',
+                    'fecha' => Carbon::now()->subDays($day++)->format('Y-m-d'),
+                ];
+            }
+            foreach ($topAnime as $a) {
+                $img = $a['images']['jpg']['large_image_url'] ?? ($a['images']['jpg']['image_url'] ?? null);
+                $items[] = [
+                    'titulo' => $a['title'] ?? 'Anime destacado',
+                    'contenido' => $a['synopsis'] ?? 'Sin sinopsis',
+                    'imagen' => $img,
+                    'categoria' => 'Anime',
+                    'fecha' => Carbon::now()->subDays($day++)->format('Y-m-d'),
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Si la API falla, se deja la tabla vacía (sin placeholders)
+        }
+
+        foreach ($items as $n) {
             Noticia::updateOrCreate(
                 ['titulo' => $n['titulo']],
-                [
-                    'contenido' => $n['contenido'],
-                    'imagen' => $n['imagen'],
-                    'categoria' => $n['categoria'] ?? null,
-                    'fecha' => $n['fecha'],
-                ]
+                $n
             );
         }
     }

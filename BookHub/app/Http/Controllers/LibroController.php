@@ -34,6 +34,11 @@ class LibroController extends Controller
 
         $libros = $query->latest()->paginate(12);
 
+        // Completar imágenes faltantes usando Jikan y persistirlas
+        foreach ($libros as $libro) {
+            $libro->fetchJikanImage();
+        }
+
         $categorias = Libro::select('categoria')
             ->whereNotNull('categoria')
             ->distinct()
