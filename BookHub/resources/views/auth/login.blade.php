@@ -21,7 +21,7 @@
     <form action="{{ route('login.perform') }}" method="POST" class="space-y-5">
       @csrf
       <div>
-        <label class="block text-sm font-semibold mb-2">Email</label>
+        <label class="block text-sm font-semibold mb-2">Correo electrónico</label>
         <input type="email" name="email" value="{{ old('email') }}" required
                class="w-full p-3 bg-neutral-900 border border-neutral-700 rounded-lg focus:border-red-500 focus:ring-1 focus:ring-red-500 transition" />
       </div>

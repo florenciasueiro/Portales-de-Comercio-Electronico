@@ -6,6 +6,7 @@ use App\Models\Noticia;
 use App\Http\Controllers\LibroController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,11 +44,14 @@ Route::resource('noticias', NoticiaController::class)->only(['index', 'show']);
 
 // Admin: crear/editar/eliminar
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Dashboard principal de administración
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
     Route::resource('libros', LibroController::class)->except(['index', 'show', 'create', 'store']);
-    Route::resource('noticias', NoticiaController::class)->except(['index', 'show', 'create', 'store']);
+    Route::resource('noticias', NoticiaController::class)->except(['index', 'show', 'create', 'store']);       
 
     // Utilidades de administración: búsqueda automática de imágenes
-    Route::get('/libros/image-search', [LibroController::class, 'imageSearch'])->name('libros.imageSearch');
+    Route::get('/libros/image-search', [LibroController::class, 'imageSearch'])->name('libros.imageSearch');   
     Route::get('/libros/image-by-id', [LibroController::class, 'imageById'])->name('libros.imageById');
     Route::get('/noticias/og-image', [NoticiaController::class, 'ogImage'])->name('noticias.ogImage');
 });

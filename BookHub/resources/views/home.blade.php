@@ -1,10 +1,15 @@
 @extends('layouts.app')
 @section('title', 'MangaHub - Inicio')
 @section('content')
-    <p class="muted">En <b>MangaHub</b> te conectamos con todo lo que amás del mundo otaku.<br>
-                    Encontrá una amplia selección de mangas para comprar, desde clásicos hasta los estrenos más esperados, y enterate de las últimas novedades del anime.<br>
-                    ¡Tu próxima historia épica comienza acá!</p>
+  @auth
+    @if(auth()->user()->is_admin)
+      <p style="text-align:center; margin-top:12px;">
+        <a class="btn" href="{{ route('admin.dashboard') }}">Ir al Panel de Administración</a>
+      </p>
+    @endif
+  @endauth
 
+  <main class="container" role="main">
     <div class="section" data-aos="fade-up">
         <h2>Libros</h2>
         <div style="margin:12px 0;">
@@ -59,6 +64,10 @@
             </div>
         @endif
     </div>
+  </main>
+  <footer role="contentinfo" style="padding:20px; text-align:center; color:#aaa;">
+    <small>&copy; {{ date('Y') }} MangaHub. Todos los derechos reservados.</small>
+  </footer>
     <script>
         (function(){
             const input = document.getElementById('book-search');
