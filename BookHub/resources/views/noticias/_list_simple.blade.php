@@ -29,6 +29,11 @@
             @auth
               @if(auth()->user()->is_admin)
                 <a href="{{ route('noticias.edit', $n) }}" class="text-neutral-300 hover:text-white">Editar</a>
+                <form method="POST" action="{{ route('noticias.destroy', $n) }}" onsubmit="return confirm('¿Eliminar esta noticia?');" class="inline">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="text-red-400 hover:text-red-300">Eliminar</button>
+                </form>
               @endif
             @endauth
           </div>

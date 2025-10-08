@@ -35,6 +35,11 @@
           @auth
             @if(auth()->user()->is_admin)
               <a href="{{ route('libros.edit', $hero) }}" class="text-neutral-300 hover:text-white">Editar</a>
+              <form method="POST" action="{{ route('libros.destroy', $hero) }}" onsubmit="return confirm('¿Eliminar este libro?');" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-400 hover:text-red-300">Eliminar</button>
+              </form>
             @endif
           @endauth
         </div>
@@ -71,8 +76,13 @@
             <a href="{{ route('libros.show', $b) }}" class="text-red-400 hover:text-red-300 font-medium">Ver detalles →</a>
             @auth
               @if(auth()->user()->is_admin)
-                <div class="flex gap-3 text-sm">
+                <div class="flex gap-3 text-sm items-center">
                   <a href="{{ route('libros.edit', $b) }}" class="text-neutral-300 hover:text-white">Editar</a>
+                  <form method="POST" action="{{ route('libros.destroy', $b) }}" onsubmit="return confirm('¿Eliminar este libro?');" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-400 hover:text-red-300">Eliminar</button>
+                  </form>
                 </div>
               @endif
             @endauth

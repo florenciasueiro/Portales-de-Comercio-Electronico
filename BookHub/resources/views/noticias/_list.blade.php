@@ -26,6 +26,18 @@
       <p class="text-neutral-200 text-sm md:text-base mt-2 line-clamp-2">{{ \Illuminate\Support\Str::limit(strip_tags($hero->contenido), 160) }}</p>
       <div class="mt-4">
         <a href="{{ route('noticias.show', $hero) }}" class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition">Leer la nota completa</a>
+        @auth
+          @if(auth()->user()->is_admin)
+            <span class="ml-3 inline-flex items-center gap-3 text-sm">
+              <a href="{{ route('noticias.edit', $hero) }}" class="text-neutral-200 hover:text-white">Editar</a>
+              <form method="POST" action="{{ route('noticias.destroy', $hero) }}" onsubmit="return confirm('¿Eliminar esta noticia?');" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-300 hover:text-red-200">Eliminar</button>
+              </form>
+            </span>
+          @endif
+        @endauth
       </div>
     </div>
   </div>
@@ -56,8 +68,13 @@
           <a href="{{ route('noticias.show', $n) }}" class="text-red-400 hover:text-red-300 font-medium">Leer más →</a>
           @auth
             @if(auth()->user()->is_admin)
-              <div class="flex gap-3 text-sm">
+              <div class="flex gap-3 text-sm items-center">
                 <a href="{{ route('noticias.edit', $n) }}" class="text-neutral-300 hover:text-white">Editar</a>
+                <form method="POST" action="{{ route('noticias.destroy', $n) }}" onsubmit="return confirm('¿Eliminar esta noticia?');" class="inline">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="text-red-400 hover:text-red-300">Eliminar</button>
+                </form>
               </div>
             @endif
           @endauth

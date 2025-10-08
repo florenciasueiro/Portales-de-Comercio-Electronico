@@ -53,6 +53,7 @@
         if (cat) params.set('categoria', cat);
         if (search) params.set('search', search);
         params.set('ajax','1');
+        if (currentView) params.set('view', currentView);
         const url = `{{ route('libros.index') }}?${params.toString()}`;
         const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         const html = await res.text();
