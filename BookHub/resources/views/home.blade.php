@@ -28,7 +28,7 @@
                             <p><strong>Categoría:</strong> {{ $libro->categoria }}</p>
                         @endif
                         @if($libro->descripcion)
-                            <p>{{ $libro->descripcion }}</p>
+                            <p>{{ \Illuminate\Support\Str::limit($libro->descripcion, 140) }}</p>
                         @endif
                         <p><a class="btn" href="{{ route('libros.show', $libro) }}">Ver detalle</a></p>
                     </div>
@@ -52,7 +52,7 @@
                             <div class="book-cover placeholder">Sin imagen</div>
                         @endif
                         <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($noticia->fecha)->format('d/m/Y') }}</p>
-                        <p>{{ $noticia->contenido }}</p>
+                        <p>{{ \Illuminate\Support\Str::limit($noticia->contenido, 160) }}</p>
                         <p><a class="btn" href="{{ route('noticias.show', $noticia) }}">Ver detalle</a></p>
                     </div>
                 @endforeach
